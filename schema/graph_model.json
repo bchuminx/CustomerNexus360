@@ -60,9 +60,6 @@
         "y": -1.1519237886466414
       },
       "caption": "Customer",
-      "style": {
-        "border-color": "#4c8eda"
-      },
       "labels": [],
       "properties": {
         "CIF": "18",
@@ -70,22 +67,25 @@
         "Gender": "2",
         "Latitude": "58.7523778",
         "Longitude": "25.3319078"
+      },
+      "style": {
+        "border-color": "#4c8eda"
       }
     },
     {
       "id": "n1",
       "position": {
-        "x": 197.9800715044808,
-        "y": -64.05960043841964
+        "x": 148.8839283341813,
+        "y": -85.95817610174836
       },
       "caption": "Card",
-      "style": {
-        "node-color": "#fe9200",
-        "border-color": "#fe9200"
-      },
       "labels": [],
       "properties": {
         "CardNumber": "702723427"
+      },
+      "style": {
+        "node-color": "#fe9200",
+        "border-color": "#fe9200"
       }
     },
     {
@@ -95,45 +95,45 @@
         "y": 101.76485005396792
       },
       "caption": "Account",
-      "style": {
-        "node-color": "#68bc00",
-        "border-color": "#68bc00"
-      },
       "labels": [],
       "properties": {
         "AccountNumber": "305466381"
+      },
+      "style": {
+        "node-color": "#68bc00",
+        "border-color": "#68bc00"
       }
     },
     {
       "id": "n3",
       "position": {
-        "x": 444.8136191897099,
-        "y": -64.05960043841964
+        "x": 442.8136191897099,
+        "y": -85.95817610174838
       },
       "caption": "Purchase",
-      "style": {
-        "node-color": "#68ccca",
-        "border-color": "#68ccca"
-      },
       "labels": [],
       "properties": {
         "Merchant": "10302"
+      },
+      "style": {
+        "node-color": "#68ccca",
+        "border-color": "#68ccca"
       }
     },
     {
       "id": "n4",
       "position": {
-        "x": 624.0589993063654,
-        "y": -64.05960043841966
+        "x": 615.0589993063654,
+        "y": -85.95817610174839
       },
       "caption": "",
-      "style": {
-        "label-position": "inside"
-      },
       "labels": [
         "Facebook"
       ],
-      "properties": {}
+      "properties": {},
+      "style": {
+        "label-position": "inside"
+      }
     },
     {
       "id": "n5",
@@ -142,64 +142,86 @@
         "y": 101.76485005396792
       },
       "caption": "Account",
-      "style": {
-        "node-color": "#68bc00",
-        "border-color": "#68bc00"
-      },
       "labels": [],
       "properties": {
         "AccountNumber": "312782310"
+      },
+      "style": {
+        "node-color": "#68bc00",
+        "border-color": "#68bc00"
       }
+    },
+    {
+      "id": "n6",
+      "position": {
+        "x": 319.4867677551167,
+        "y": -184.45577136594002
+      },
+      "caption": "UnionPay",
+      "style": {
+        "node-color": "#0c797d",
+        "border-color": "#0c797d"
+      },
+      "labels": [],
+      "properties": {}
     }
   ],
   "relationships": [
     {
       "id": "n0",
-      "type": "HAS_CARD",
-      "style": {},
-      "properties": {},
       "fromId": "n0",
-      "toId": "n1"
+      "toId": "n1",
+      "type": "HAS_CARD",
+      "properties": {},
+      "style": {}
     },
     {
       "id": "n1",
-      "type": "HAS_ACCOUNT",
-      "style": {},
-      "properties": {},
       "fromId": "n0",
-      "toId": "n2"
+      "toId": "n2",
+      "type": "HAS_ACCOUNT",
+      "properties": {},
+      "style": {}
     },
     {
       "id": "n2",
+      "fromId": "n1",
+      "toId": "n3",
       "type": "PURCHASE",
-      "style": {},
       "properties": {
         "purchaseAmount": "2403.788365",
         "purchaseId": "901410",
         "purchaseEpoch": "1619275906"
       },
-      "fromId": "n1",
-      "toId": "n3"
+      "style": {}
     },
     {
       "id": "n3",
-      "type": "HAS_MERCHANT",
-      "style": {},
-      "properties": {},
       "fromId": "n3",
-      "toId": "n4"
+      "toId": "n4",
+      "type": "HAS_MERCHANT",
+      "properties": {},
+      "style": {}
     },
     {
       "id": "n4",
+      "fromId": "n2",
+      "toId": "n5",
       "type": "TRANSFER",
-      "style": {},
       "properties": {
         "transactionAmount": "126099.0518",
         "transactionId": "939991",
         "transferEpoch": "630896574"
       },
-      "fromId": "n2",
-      "toId": "n5"
+      "style": {}
+    },
+    {
+      "id": "n5",
+      "type": "HAS_CARD_ISSUER",
+      "style": {},
+      "properties": {},
+      "fromId": "n1",
+      "toId": "n6"
     }
   ]
 }
