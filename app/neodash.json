@@ -1,0 +1,230 @@
+{
+  "title": "CustomerNexus360",
+  "version": "2.3",
+  "settings": {
+    "pagenumber": 0,
+    "editable": true,
+    "fullscreenEnabled": false,
+    "parameters": {
+      "neodash_customer_cif": "",
+      "neodash_customer_cif_display": "",
+      "neodash_top_account": "",
+      "neodash_top_account_display": "",
+      "neodash_top_account_number": "566838044",
+      "neodash_top_account_number_display": "566838044",
+      "neodash_all_merchants": "Amazon.com",
+      "neodash_all_merchants_display": "Amazon.com"
+    },
+    "theme": "light"
+  },
+  "pages": [
+    {
+      "title": "Main Page",
+      "reports": [
+        {
+          "id": "6fb5b174-b75a-42e9-bedd-f15f448cfef1",
+          "title": "Transaction Anomaly: Flagging Unusual Sender Account Behaviour",
+          "query": "MATCH ()-[r:TRANSFER]->()\nWITH r.transactionAmount AS allAmounts\n\nWITH AVG(allAmounts) AS OverallMeanTransactionAmount,\npercentileCont(allAmounts, 0.5) AS OverallMedianTransactionAmount,\nSTDEV(allAmounts) AS OverallStandardDeviationTransactionAmount\n\n// Calculate the stats for transaction amounts for each sender account\nMATCH (sender:Account)-[r:TRANSFER]->(receiver:Account)\nWITH sender, r.transactionAmount AS amounts, OverallMeanTransactionAmount, OverallMedianTransactionAmount, OverallStandardDeviationTransactionAmount\n\nWITH sender,\namounts,\nOverallMeanTransactionAmount,\nOverallMedianTransactionAmount,\nOverallStandardDeviationTransactionAmount,\n// Calculate anomaly scores\nCASE\nWHEN ABS(AVG(amounts) - OverallMeanTransactionAmount) > 1000 THEN 1\nELSE 0\nEND AS MeanAnomalyScore,\nCASE\nWHEN ABS(percentileCont(amounts, 0.5) - OverallMedianTransactionAmount) > 1000 THEN 1\nELSE 0\nEND AS MedianAnomalyScore,\nCASE\nWHEN ABS(STDEV(amounts) - OverallMeanTransactionAmount) > 1000 THEN 1\nELSE 0\nEND AS StdDevAnomalyScore\n\nRETURN toString(sender.AccountNumber) AS SenderAccountNumber,\nCOUNT(amounts) AS TransactionCount,\nAVG(amounts) AS MeanTransactionAmount,\npercentileCont(amounts, 0.5) AS MedianTransactionAmount,\nSTDEV(amounts) AS StandardDeviationTransactionAmount,\nOverallMeanTransactionAmount, // Include overall statistics in the result\nOverallMedianTransactionAmount,\nOverallStandardDeviationTransactionAmount,\nMeanAnomalyScore,\nMedianAnomalyScore,\nStdDevAnomalyScore,\n// Calculate the combined Anomaly field\nCASE\nWHEN MeanAnomalyScore = 1 AND MedianAnomalyScore = 1 AND StdDevAnomalyScore = 1 THEN 1\nELSE 0\nEND AS Anomaly\nORDER BY Anomaly DESC;\n\n\n",
+          "width": 12,
+          "height": 2,
+          "x": 0,
+          "y": 0,
+          "type": "table",
+          "selection": {},
+          "settings": {},
+          "schema": [],
+          "database": "customernexus360"
+        },
+        {
+          "id": "2dacddff-9cf3-44a2-a2a3-04e3c98e02cb",
+          "title": "Cyclic Transfers by Account (Top PageRank Accounts)",
+          "query": "MATCH (a:Account)\nWHERE toString(a.AccountNumber) = $neodash_top_account_number\nWITH collect(a) as nodes \nCALL apoc.nodes.cycles(nodes, {relTypes: [\"TRANSFER\"], maxDepth: 10}) \nYIELD path \nWITH path, length(path) AS pathLength\nORDER BY pathLength DESC\nRETURN path",
+          "width": 5,
+          "height": 2,
+          "x": 0,
+          "y": 3,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "backgroundColor": "white",
+            "layout": "tree"
+          },
+          "schema": [],
+          "database": "customernexus360"
+        },
+        {
+          "id": "83b3b237-a826-4502-be34-130d74fe4d85",
+          "title": "Select Top Accounts Ranked by PageRank",
+          "query": "MATCH (a:Account)\nRETURN toString(a.AccountNumber)\nORDER BY a.PageRank DESC\nLIMIT 10\n\n\n",
+          "width": 5,
+          "height": 1,
+          "x": 0,
+          "y": 2,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Custom Query",
+            "entityType": "top_account_number",
+            "parameterName": "neodash_top_account_number"
+          },
+          "schema": [],
+          "database": "customernexus360"
+        },
+        {
+          "id": "3e361b32-b685-4d77-bc29-44ed5cfc74f4",
+          "title": "Identify Potential Colluding Accounts by Community Detection",
+          "query": "\nMATCH (a1:Account)-[r:TRANSFER]->(a2:Account)\nWHERE r.transactionAmount >= 5000\n\nWITH COLLECT(DISTINCT a1) + COLLECT(DISTINCT a2) AS nodes\n\nUNWIND nodes AS node\nWITH DISTINCT node.communityId AS communityId, COLLECT(DISTINCT toString(node.AccountNumber)) AS accountsInCommunity\nWITH communityId, accountsInCommunity, size(accountsInCommunity) AS communitySize\nWHERE communitySize > 1\nRETURN communityId AS CommunityId, accountsInCommunity AS Accounts_In_Community\nORDER BY communitySize DESC\n\n\n",
+          "width": 7,
+          "height": 3,
+          "x": 5,
+          "y": 2,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "columnWidths": "[1,8]"
+          },
+          "database": "customernexus360"
+        },
+        {
+          "id": "632855a3-e61a-4736-935c-0eb03d691815",
+          "title": "Customer Locations of Top PageRank Accounts",
+          "query": "MATCH (c:Customer)-[:HAS_ACCOUNT]-(a)\nRETURN c\nORDER BY a.pagerank DESC\nLIMIT 10\n",
+          "width": 5,
+          "height": 3,
+          "x": 0,
+          "y": 5,
+          "type": "map",
+          "selection": {
+            "Customer": "Latitude"
+          },
+          "settings": {},
+          "schema": [
+            [
+              "Customer",
+              "CIF",
+              "Coordinate",
+              "Latitude",
+              "Gender",
+              "Longitude",
+              "Age"
+            ]
+          ],
+          "database": "customernexus360"
+        },
+        {
+          "id": "62f7dd33-9b2e-4d82-af61-1639da73805a",
+          "title": "Geographic Proximity on Customers' Transfer Behaviour",
+          "query": "MATCH (c1:Customer)-[:HAS_ACCOUNT]->(a:Account)\nWITH c1, a, point({latitude: c1.Latitude, longitude: c1.Longitude}) AS customerLocationA\nMATCH (c2:Customer)-[:HAS_ACCOUNT]->(b:Account)\nWHERE id(c1) < id(c2) // To avoid duplicate pairs\nWITH c1, a, b, customerLocationA, c2, point({latitude: c2.Latitude, longitude: c2.Longitude}) AS customerLocationB\nWITH c1, a, b, customerLocationA, c2, customerLocationB, ROUND(toFloat(point.distance(customerLocationA, customerLocationB)/1000), 2) AS DistanceInKM\nRETURN c1.CIF AS C1, toString(a.AccountNumber) AS C1_AccountNumber, c2.CIF AS C2, toString(b.AccountNumber) AS C2_AccountNumber, DistanceInKM\nORDER BY DistanceInKM\nLIMIT 1000\n\n\n\n",
+          "width": 7,
+          "height": 3,
+          "x": 5,
+          "y": 5,
+          "type": "table",
+          "selection": {},
+          "settings": {},
+          "database": "customernexus360"
+        },
+        {
+          "id": "c1694d9a-7434-4c1c-8043-24815beb131e",
+          "title": "Identifying Potential Account Fraud based on Community Difference, PageRank, and Geographic Proximity",
+          "query": "MATCH (c1:Customer)-[:HAS_ACCOUNT]->(a:Account)-[:TRANSFER]->(b:Account)<-[:HAS_ACCOUNT]-(c2:Customer)\nWHERE id(c1) < id(c2)  // To avoid duplicate pairs\nWITH a, b, c1, c2,\n     abs(a.communityId - b.communityId) AS communityDifference, // Calculate community ID difference\n     a.pagerank AS sourcePageRank, b.pagerank AS targetPageRank // Get PageRank for source and target accounts\nWITH a, b, c1, c2, communityDifference, sourcePageRank, targetPageRank,\n     point({latitude: c1.Latitude, longitude: c1.Longitude}) AS customerLocationC1,\n     point({latitude: c2.Latitude, longitude: c2.Longitude}) AS customerLocationC2\nWITH a, b, c1, c2, communityDifference, sourcePageRank, targetPageRank, customerLocationC1, customerLocationC2,\n     point.distance(customerLocationC1, customerLocationC2)/1000 AS distanceBetweenCustomersInKM\nWHERE communityDifference > 1 // Define a threshold for community ID difference\nAND sourcePageRank < targetPageRank // Consider only transfers to higher PageRank accounts\nAND distanceBetweenCustomersInKM > 5000\nRETURN toString(a.AccountNumber) AS C1_AccountNumber, toString(b.AccountNumber) AS C2_AccountNumber, c1.CIF AS C1_CIF, c2.CIF AS C2_CIF, communityDifference, sourcePageRank, targetPageRank, distanceBetweenCustomersInKM",
+          "width": 12,
+          "height": 2,
+          "x": 0,
+          "y": 8,
+          "type": "table",
+          "selection": {},
+          "settings": {},
+          "database": "customernexus360"
+        }
+      ]
+    },
+    {
+      "title": "New page",
+      "reports": [
+        {
+          "id": "19341c2e-4f03-47b2-a2c6-2a56bed49f9c",
+          "title": "Select Merchant",
+          "query": "MATCH (n)-[:HAS_MERCHANT]-(m)\nRETURN DISTINCT labels(n)[0] AS Merchant\n\n",
+          "width": 4,
+          "height": 1,
+          "x": 0,
+          "y": 0,
+          "type": "select",
+          "selection": {},
+          "settings": {
+            "type": "Custom Query",
+            "entityType": "all_merchants",
+            "parameterName": "neodash_all_merchants"
+          },
+          "schema": [],
+          "database": "customernexus360"
+        },
+        {
+          "id": "73391cc5-b829-4fc9-9012-778fddd70b5b",
+          "title": "Total Purchase by Merchant in 2021",
+          "query": "\nMATCH (n)<-[:HAS_MERCHANT]-(p:Purchase)-[r:PURCHASE]-(x)\nWHERE $neodash_all_merchants IN labels(n)\nWITH p, r, datetime({ epochMillis: toInteger(r.purchaseEpoch) * 1000 }) AS purchaseDateTime\nWHERE purchaseDateTime.year = 2021\nWITH p, purchaseDateTime.month AS purchaseMonth\nMATCH (p)-[:PURCHASE]-(:Card)-[:HAS_CARD]-(c:Customer)\nRETURN purchaseMonth AS Month, COUNT(DISTINCT c) AS Total_Purchase\nORDER BY purchaseMonth\n\n\n\n\n",
+          "width": 4,
+          "height": 3,
+          "x": 0,
+          "y": 1,
+          "type": "line",
+          "selection": {
+            "x": "Month",
+            "value": [
+              "Total_Purchase"
+            ]
+          },
+          "settings": {
+            "xScale": "linear",
+            "maxXValue": 10,
+            "minYValue": 0
+          },
+          "schema": [],
+          "database": "customernexus360"
+        },
+        {
+          "id": "1c675026-ea1e-49a2-a1da-606346781548",
+          "title": "Customer Purchase Preferences History",
+          "query": "MATCH (c:Customer)-[:HAS_CARD]->(card)-[r:PURCHASE]->(purchase)-[:HAS_MERCHANT]->(merchant)\nWITH c.CIF AS CustomerID, COLLECT(labels(merchant)) AS MerchantNames, ROUND(SUM(r.purchaseAmount), 2) AS Total_Expenditure\nWITH CustomerID, apoc.coll.flatten(MerchantNames) AS MerchantNames, Total_Expenditure\nWITH CustomerID, apoc.coll.frequencies(MerchantNames) AS MerchantFrequencies, Total_Expenditure\nUNWIND MerchantFrequencies AS output \nWITH CustomerID, output.item + ':' + output.count AS MerchantCountConcatenated, Total_Expenditure\nWITH CustomerID, COLLECT(MerchantCountConcatenated) AS AllMerchantCounts, Total_Expenditure\nWITH CustomerID, AllMerchantCounts, Total_Expenditure\nWITH CustomerID, [countStr IN AllMerchantCounts | apoc.text.split(countStr, ':')] AS SplitCounts, Total_Expenditure\nWITH CustomerID, [item IN SplitCounts | item[0] + ':' + item[1]] AS AllMerchantCounts, Total_Expenditure\nWITH CustomerID, AllMerchantCounts, Total_Expenditure\nWITH CustomerID, AllMerchantCounts, Total_Expenditure\nRETURN CustomerID, \n       REDUCE(s = [], countStr IN AllMerchantCounts | \n             CASE WHEN SIZE(s) < 5 THEN s + countStr ELSE s END) AS Top_5_Merchant_Counts, \n       Total_Expenditure\nORDER BY Total_Expenditure DESC\n",
+          "width": 6,
+          "height": 2,
+          "x": 4,
+          "y": 3,
+          "type": "table",
+          "selection": {},
+          "settings": {
+            "transposed": false,
+            "compact": false,
+            "columnWidths": "[1,7,1]"
+          },
+          "database": "customernexus360",
+          "schema": []
+        },
+        {
+          "id": "f397a7db-f531-4616-8415-b9a6a5781474",
+          "title": "Top 5 Merchant Purchases",
+          "query": "MATCH (:Customer)-[:HAS_CARD]->(:Card)-[:PURCHASE]->(:Purchase)-[:HAS_MERCHANT]->(merchant)\nWITH merchant, COUNT(*) AS totalPurchaseCount\nRETURN labels(merchant)[0] AS merchant, totalPurchaseCount\nORDER BY totalPurchaseCount\nLIMIT 5",
+          "width": 6,
+          "height": 2,
+          "x": 4,
+          "y": 0,
+          "type": "pie",
+          "selection": {
+            "index": "merchant",
+            "value": "totalPurchaseCount",
+            "key": "(none)"
+          },
+          "settings": {},
+          "schema": [],
+          "database": "customernexus360"
+        }
+      ]
+    }
+  ],
+  "parameters": {},
+  "extensions": {
+    "active": true,
+    "activeReducers": []
+  }
+}
