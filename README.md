@@ -60,3 +60,36 @@ To set up and use the project, follow these steps:
 
     You can access the Neo4j Web UI by opening a web browser and navigating to [http://localhost:7474/browser](http://localhost:7474/browser). Log in using the credentials `neo4j` for the username and for the password (as specified in the YAML file). 
 Additionally, you have the option to utilize Neo4j Desktop and establish a remote connection. Assign a name to your remote connection and configure the connection URL as follows: ```neo4j://localhost:7687```
+
+## Creating a Conda Environment
+
+To work with this project, it is recommended to create a dedicated Conda environment to manage your dependencies and avoid version conflicts of the existing packages. Follow the steps below to set up the environment and install the required packages.
+
+### 1. Create a New Conda Environment
+
+```bash
+conda create --name nexus360 python=3.8.16
+```
+
+### 2. Activate the Conda Environment
+Activate the newly created environment using the following command:
+
+```bash
+conda activate nexus360
+```
+### 3. Deactivate the Conda Environment
+If the Conda environment is no longer in use, you can deactivate it using the following command:
+
+```bash
+conda deactivate
+```
+This command will exit the current Conda environment, returning you to the base environment or the system's default Python environment.
+
+### 3. Install Project Dependencies
+Now that you're in the "nexus360" environment, go to the root of the project directory and you can install the project dependencies listed in the requirements.txt file. Run the following command:
+```bash
+pip install -r requirements.txt
+```
+
+This command will install all the necessary Python packages and their specific versions as specified in requirements.txt.
+You are now ready to work with the project in the dedicated "nexus360" conda environment. Remember to activate this environment whenever you work on the project to ensure that you are using the correct dependencies.
