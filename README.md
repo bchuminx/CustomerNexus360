@@ -93,3 +93,61 @@ pip install -r requirements.txt
 
 This command will install all the necessary Python packages and their specific versions as specified in requirements.txt.
 You are now ready to work with the project in the dedicated "nexus360" conda environment. Remember to activate this environment whenever you work on the project to ensure that you are using the correct dependencies.
+
+## Graph Schema![graph_schema](https://github.com/bchuminx/CustomerNexus360/assets/7111764/1f0b6d52-f86a-4965-ba78-2d0faf7d2655)
+
+The graph schema is designed to represent customer data, card information, account transfers, and purchase transactions in a Neo4j graph database. It aims to capture essential information while optimizing data storage and query performance.
+### Customer Node
+- **Properties**: 
+  - CIF (Customer Identification Number)
+  - Age
+  - Gender (Encoded: 1 for Female, 2 for Male)
+  - Latitude
+  - Longitude
+    Note: The 'Latitude' and 'Longitude' properties are computed using the Geopy library based on the 'Address' and 'Country' information from the 'customers.csv'. The 'Gender' property is encoded using label encoding.
+  
+### Card Node
+- **Properties**:
+  - CardNumber (Converted to Integer)
+    Note: Initially stored as hyphenated strings in 'customers.csv', later converted to integers.
+
+### Account Node
+- **Properties**:
+  - AccountNumber (Converted to Integer)
+    Note: Initially stored as hyphenated strings in 'customers.csv', later converted to integers.
+
+### Purchase Node (Placeholder)
+- **Properties**:
+  - Merchant (Mapped to unique IDs using a nodemapper)
+  - purchaseAmount
+  - purchaseEpoch 
+  - purchaseId 
+    Note: The 'Purchase' node serves as a placeholder to represent each purchase made by a customer. It is linked to the 'Card' node using the "PURCHASE" relationship.
+
+### Relationships
+- **PURCHASE**: Links Customer nodes to Purchase nodes
+  - **Properties**: purchaseAmount, purchaseEpoch, purchaseId
+  Note: 
+    purchaseEpoch: Epoch timestamp calculated from 'PurchaseDatetime' in 'purchases.csv'.
+    purchaseId: Taken from 'TransactionID' in 'purchases.csv'.
+
+- **HAS_MERCHANT**: Links Purchase placeholder nodes to Merchant label ('Facebook', etc.)
+
+### Account Transfer
+Accounts can make transfers between each other
+- **TRANSFER**: Represents transfers between Account nodes
+  - **Properties**: transactionAmount, transactionId, transferEpoch (Calculated from TransferDatetime as Epoch)
+
+### Additional Information
+- The schema focuses on capturing the most essential fields required for Cypher queries.
+- Some string values are encoded to optimize storage and queries.
+- DateTime values are converted into epoch timestamps.
+- Address/country strings are converted into geo-coordinates using Geopy.
+- The Graph Data Science library for graph projection supports specific property types but does not support string or datetime types.
+- Therefore the data from CSV files is transformed as needed:
+  - Strings may be encoded
+  - Datetimes converted to epoch values
+  - Address/Country strings converted to geo-coordinates
+
+
+
