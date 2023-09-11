@@ -323,6 +323,6 @@ if __name__ == "__main__":
                 run_query(q9_cypher, "QUERY-9", q9_description)
 
             else:
-                log.info("Invalid query number. Please select a number from 1 to 6.")
+                log.info("Invalid query number. Please select a number from 1 to 9.")
         except ValueError:
             log.error("Invalid input. Please enter a valid number.")
