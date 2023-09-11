@@ -173,3 +173,67 @@ To execute neo_arrow_app.py, follow these steps:
 python neo_arrow_app.py
 ```
 
+## Analysis and Discovery
+
+### Cypher Queries
+
+To run the Cypher queries, use the `cypher_app.py`. You can select a query to run by typing the corresponding number when prompted. 
+Please refer to `cypher_app.py` for further description on each of the queries below.
+Here are the available queries:
+
+1. **Calculate Total Expenditure of Each Customer:** This query calculates the total expenditure of each customer based on their purchase history.
+2. **Calculate Total Expenditure by Merchant for Each Customer:** This query calculates the total expenditure by merchant for each customer.
+3. **Filter Purchases by Merchant and Year:** The query filters purchases made at the specified merchant in the year 2021, then groups them by month.
+4. **Identify Anomalous Transactions:** This query calculates statistics and assigns anomaly flags for transactions conducted by sender accounts at the first level hop in the network.
+5. **Find Cycles Involving Top PageRank Accounts:** The query selects the top 10 accounts based on their PageRank, finds cycles of up to a maximum depth of 10 involving these influential accounts through 'TRANSFER' relationships, and returns those cycles in the graph.
+6. **Detect Potential Colluding Accounts:** This query leverages Louvain community detection to uncover potential colluding accounts, surfacing concealed associations within account transfers.
+7. **Calculate Average Distance Between Customer Locations:** This query calculates the average distance between pairs of customer locations based on latitude and longitude.
+8. **Calculate Pairwise Distances Between Customers:** This query calculates the pairwise distances in kilometers between customers' locations based on their associated accounts, aiming to understand the geographic proximity between customers.
+9. **Identify Potential Account Fraud:** This query identifies potential account fraud based on community difference, PageRank, and geographic proximity.
+
+### Running the App
+
+To run the Python scripts (`cypher_app.py`), ensure you have the necessary prerequisites and dependencies installed. You can set up the required environment using the provided `requirements.txt` file. To execute the app, open a terminal, navigate to the project directory, and run:
+
+```bash
+python cypher_app.py
+```
+
+### NeoDash Dashboard
+```neodash.json``` is included in this repository. You can use NeoDash to visualize and explore the Neo4j database.
+
+Launch NeoDash via a web browser at https://neodash.graphapp.io or use NeoDash in the Neo4j Desktop.
+Choose "New Dashboard."
+Enter your Neo4j database credentials (username and password).
+Load the neodash.json file to access the pre-configured dashboard.
+The dashboard provides an intuitive interface for exploring your Neo4j database and running queries interactively.
+
+### Neo4j Bloom
+![bloom_customernexus360](https://github.com/bchuminx/CustomerNexus360/assets/7111764/8f98857c-d438-458f-b5c1-be53dfc49d17)
+
+Neo4j Bloom is a powerful tool for visualizing and exploring graph data stored in Neo4j databases. It provides an intuitive interface for creating and running graph queries while also enabling interactive exploration of graph structures. In this project, Neo4j Bloom is used to complement the analysis capabilities provided by Cypher queries.
+
+### Launching Neo4j Bloom
+
+You can access Neo4j Bloom directly from the Neo4j Desktop, similar to launching NeoDash. Follow these steps:
+
+1. Open Neo4j Desktop and select your current active database.
+2. In the top-right corner of the Neo4j Desktop interface, click the dropdown box.
+3. Find and select "Neo4j Bloom" from the available options.
+
+### Using Neo4j Bloom
+
+Once Neo4j Bloom is launched, you can use it to visualize and explore your graph data. One of the powerful features of Neo4j Bloom is the ability to create custom queries and visualize their results.
+
+#### Custom Queries in Neo4j Bloom
+
+In this project, I've added a custom query to Neo4j Bloom that was defined in the `cypher_app.py` for the cyclic detection of account transfers. This query helps you identify patterns in account transfers within your customer graph.
+
+#### Adding a Search Phrase
+When defining a custom query in Neo4j Bloom, you will need to add a meaningful search phrase. A search phrase allows you to quickly access and run the query when working with your graph data.
+
+#### Leveraging Graph Data Science
+Neo4j Bloom supports the use of Graph Data Science algorithms, which can be layered onto your visualizations to enhance the interpretability of the results. For example, in this project, I've used both PageRank and Louvain community detection algorithms to enrich the results visualisation.
+- **PageRank:** This algorithm assigns importance scores to nodes, making larger nodes more prominent. It helps to identify key entities in the graph.
+- **Louvain Community Detection:** This algorithm identifies communities or clusters of nodes that share similar characteristics, and from the communityId, Bloom assigns the same color to nodes within the same community.
+
