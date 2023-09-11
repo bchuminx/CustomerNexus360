@@ -153,5 +153,23 @@ Accounts can make transfers between each other
   - Datetimes converted to epoch values
   - Address/Country strings converted to geo-coordinates
 
+## Running the Application
 
+### neo_arrow_app.py
+
+The neo_arrow_app.py is purpose-built to streamline the ingestion of CSV files into Neo4j, leveraging the Graph Data Science (GDS) client with Arrow Flight streaming enabled. Before running the application, it's essential to ensure that all prerequisites are correctly configured.
+
+#### Prerequisites
+Before executing the script, verify that you have met the following prerequisites:
+
+Python: Ensure that you have Python 3.8.16 or a compatible version installed on your system. Refer to the section on "Creating a Conda Environment" for version details.
+Dependencies: Install the required Python packages by running the following command with the provided requirements.txt file:
+
+To execute neo_arrow_app.py, follow these steps:
+- Open your terminal prompt.
+- Navigate to the app directory within the project.
+- Run the following command:
+```bash
+python neo_arrow_app.py
+```
 
