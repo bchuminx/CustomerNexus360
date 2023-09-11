@@ -1,0 +1,205 @@
+{
+  "style": {
+    "font-family": "sans-serif",
+    "background-color": "#FAFCFF",
+    "background-image": "",
+    "background-size": "100%",
+    "node-color": "#4C8EDA",
+    "border-width": 2,
+    "border-color": "#2870c2",
+    "radius": 25,
+    "node-padding": 5,
+    "node-margin": 2,
+    "outside-position": "auto",
+    "node-icon-image": "",
+    "node-background-image": "",
+    "icon-position": "inside",
+    "icon-size": 64,
+    "caption-position": "inside",
+    "caption-max-width": 200,
+    "caption-color": "#ffffff",
+    "caption-font-size": 10,
+    "caption-font-weight": "normal",
+    "label-position": "outside",
+    "label-display": "bare",
+    "label-color": "#ffffff",
+    "label-background-color": "#4C8EDA",
+    "label-border-color": "#4C8EDA",
+    "label-border-width": 0,
+    "label-font-size": 10,
+    "label-padding": 2,
+    "label-margin": 2,
+    "directionality": "directed",
+    "detail-position": "inline",
+    "detail-orientation": "parallel",
+    "arrow-width": 1,
+    "arrow-color": "#A5ABB6",
+    "margin-start": 0,
+    "margin-end": 0,
+    "margin-peer": 20,
+    "attachment-start": "normal",
+    "attachment-end": "normal",
+    "relationship-icon-image": "",
+    "type-color": "#000000",
+    "type-background-color": "#ffffff",
+    "type-border-color": "#000000",
+    "type-border-width": 0,
+    "type-font-size": 10,
+    "type-padding": 2,
+    "property-position": "outside",
+    "property-alignment": "colon",
+    "property-color": "#000000",
+    "property-font-size": 10,
+    "property-font-weight": "normal"
+  },
+  "nodes": [
+    {
+      "id": "n0",
+      "position": {
+        "x": 1.9951905283833185,
+        "y": -1.1519237886466414
+      },
+      "caption": "Customer",
+      "style": {
+        "border-color": "#4c8eda"
+      },
+      "labels": [],
+      "properties": {
+        "CIF": "18",
+        "Age": "70",
+        "Gender": "2",
+        "Latitude": "58.7523778",
+        "Longitude": "25.3319078"
+      }
+    },
+    {
+      "id": "n1",
+      "position": {
+        "x": 197.9800715044808,
+        "y": -64.05960043841964
+      },
+      "caption": "Card",
+      "style": {
+        "node-color": "#fe9200",
+        "border-color": "#fe9200"
+      },
+      "labels": [],
+      "properties": {
+        "CardNumber": "702723427"
+      }
+    },
+    {
+      "id": "n2",
+      "position": {
+        "x": 197.9800715044808,
+        "y": 101.76485005396792
+      },
+      "caption": "Account",
+      "style": {
+        "node-color": "#68bc00",
+        "border-color": "#68bc00"
+      },
+      "labels": [],
+      "properties": {
+        "AccountNumber": "305466381"
+      }
+    },
+    {
+      "id": "n3",
+      "position": {
+        "x": 444.8136191897099,
+        "y": -64.05960043841964
+      },
+      "caption": "Purchase",
+      "style": {
+        "node-color": "#68ccca",
+        "border-color": "#68ccca"
+      },
+      "labels": [],
+      "properties": {
+        "Merchant": "10302"
+      }
+    },
+    {
+      "id": "n4",
+      "position": {
+        "x": 624.0589993063654,
+        "y": -64.05960043841966
+      },
+      "caption": "",
+      "style": {
+        "label-position": "inside"
+      },
+      "labels": [
+        "Facebook"
+      ],
+      "properties": {}
+    },
+    {
+      "id": "n5",
+      "position": {
+        "x": 505.84378172870373,
+        "y": 101.76485005396792
+      },
+      "caption": "Account",
+      "style": {
+        "node-color": "#68bc00",
+        "border-color": "#68bc00"
+      },
+      "labels": [],
+      "properties": {
+        "AccountNumber": "312782310"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "id": "n0",
+      "type": "HAS_CARD",
+      "style": {},
+      "properties": {},
+      "fromId": "n0",
+      "toId": "n1"
+    },
+    {
+      "id": "n1",
+      "type": "HAS_ACCOUNT",
+      "style": {},
+      "properties": {},
+      "fromId": "n0",
+      "toId": "n2"
+    },
+    {
+      "id": "n2",
+      "type": "PURCHASE",
+      "style": {},
+      "properties": {
+        "purchaseAmount": "2403.788365",
+        "purchaseId": "901410",
+        "purchaseEpoch": "1619275906"
+      },
+      "fromId": "n1",
+      "toId": "n3"
+    },
+    {
+      "id": "n3",
+      "type": "HAS_MERCHANT",
+      "style": {},
+      "properties": {},
+      "fromId": "n3",
+      "toId": "n4"
+    },
+    {
+      "id": "n4",
+      "type": "TRANSFER",
+      "style": {},
+      "properties": {
+        "transactionAmount": "126099.0518",
+        "transactionId": "939991",
+        "transferEpoch": "630896574"
+      },
+      "fromId": "n2",
+      "toId": "n5"
+    }
+  ]
+}
