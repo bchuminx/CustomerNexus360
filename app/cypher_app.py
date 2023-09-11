@@ -46,6 +46,12 @@ def init_graph():
 
         louvain_metadata = gds.louvain.write(G1, writeProperty='communityId')
         log.info(louvain_metadata)
+    
+    gds.run_cypher("""
+        MATCH (c:Customer)
+        SET c.Coordinate = point({latitude: toFloat(c.Latitude), longitude: toFloat(c.Longitude)})
+        RETURN DISTINCT COUNT(c)
+    """)
 
 # Run and log the Cypher query with description and results
 def run_query(cypher_query, query_name, query_description):
@@ -75,6 +81,9 @@ if __name__ == "__main__":
         log.info("  [Q4] The query calculates the stats and assign anomaly flags for transactions conducted by sender accounts at the first level hop in the network.")
         log.info("  [Q5] The query selects the top 10 accounts based on their PageRank, finds cycles of up to maximum depth of 10 involving these `influential` accounts through 'TRANSFER' relationships, and returns those cycles in the graph.")
         log.info("  [Q6] The query leverages Louvain community detection to uncover potential colluding accounts, surfacing concealed associations within account transfers.")
+        log.info("  [Q7] This query calculates the average distance between pairs of customer locations based on latitude and longitude.")
+        log.info("  [Q8] This query calculates the pairwise distances in kilometers between customers' locations based on their associated accounts, aiming to understand the geographic proximity between customers.")
+        log.info("  [Q9] This query identifies potential account fraud based on community difference, PageRank, and geographic proximity.")
 
         user_input = input("\nEnter the query number or 'Q' to exit: ")
 
@@ -231,7 +240,7 @@ if __name__ == "__main__":
                 #note: the results produced is better suited for visualization or viewing in NeoDash
                 q6_description = (
                 "The query leverages Louvain community detection to uncover potential colluding accounts, surfacing concealed associations within account transfers."
-                "This will e useful in identifying abnormal cluster sizes, flagging potentially fraudulent activities involving numerous accounts for further investigation."
+                "This will be useful in identifying abnormal cluster sizes, flagging potentially fraudulent activities involving numerous accounts for further investigation."
                 )
                 q6_cypher = """
                     MATCH (a1:Account)-[r:TRANSFER]->(a2:Account)
@@ -247,6 +256,72 @@ if __name__ == "__main__":
                     ORDER BY communitySize DESC
                 """
                 run_query(q6_cypher, "QUERY-6", q6_description)
+
+            elif selected_query == 7:
+                '''
+                    QUERY-7: 
+                '''
+                q7_description = (
+                "This query calculates the average distance between pairs of customer locations based on latitude and longitude."
+                "This is essential for understanding the spatial distribution of customers and can help in identifying clustering patterns based on proximity."
+                )
+                q7_cypher = """
+                MATCH (c1:Customer), (c2:Customer)
+                WHERE id(c1) < id(c2)  // To avoid duplicate pairs
+                WITH ROUND(toFloat(point.distance(point({latitude: c1.Latitude, longitude: c1.Longitude}), point({latitude: c2.Latitude, longitude: c2.Longitude}))/1000), 2) AS dist
+                RETURN AVG(dist) AS AverageDistanceInKM
+                """
+                run_query(q7_cypher, "QUERY-7", q7_description)
+                
+            elif selected_query == 8:
+                '''
+                    QUERY-8: 
+                '''
+                q8_description = (
+                "This query calculates the pairwise distances in kilometers between customers' locations based on their associated accounts, aiming to understand the geographic proximity between customers."
+                "This is useful to establish expected patterns of behavior on customers; when customers typically conduct account transfers within a certain geographic region, sudden transfers from distant locations may raise suspicion and signal potential fraudulent activities."
+                )
+                q8_cypher = """
+                MATCH (c1:Customer)-[:HAS_ACCOUNT]->(a:Account)
+                WITH c1, a, point({latitude: c1.Latitude, longitude: c1.Longitude}) AS customerLocationA
+                MATCH (c2:Customer)-[:HAS_ACCOUNT]->(b:Account)
+                WHERE id(c1) < id(c2) // To avoid duplicate pairs
+                WITH c1, a, b, customerLocationA, c2, point({latitude: c2.Latitude, longitude: c2.Longitude}) AS customerLocationB
+                WITH c1, a, b, customerLocationA, c2, customerLocationB, ROUND(toFloat(point.distance(customerLocationA, customerLocationB)/1000), 2) AS DistanceInKM
+                RETURN c1.CIF AS C1, a.AccountNumber AS C1_AccountNumber, c2.CIF AS C2, b.AccountNumber AS C2_AccountNumber, DistanceInKM
+                ORDER BY DistanceInKM
+                LIMIT 100
+                """
+                run_query(q8_cypher, "QUERY-8", q8_description)
+
+            elif selected_query == 9:
+                '''
+                    QUERY-9: 
+                '''
+                q9_description = (
+                "This query identifies pairs of accounts involved in transfers that exhibit suspicious behavior based on community differences, PageRank, and geographic distance."
+                "Calculate the difference in community IDs, compare PageRank values, and measure the distances between customers and accounts."
+                "Thresholds can be set for community difference, PageRank, and geographic distance to define suspicious account transfers."
+                "Suspicious account transfers can include transfers to accounts with higher PageRank, significant community ID differences, and geographic distances exceeding the specified thresholds."
+                )
+                q9_cypher = """
+                MATCH (c1:Customer)-[:HAS_ACCOUNT]->(a:Account)-[:TRANSFER]->(b:Account)<-[:HAS_ACCOUNT]-(c2:Customer)
+                WHERE id(c1) < id(c2)  // To avoid duplicate pairs
+                WITH a, b, c1, c2,
+                    abs(a.communityId - b.communityId) AS communityDifference, // Calculate community ID difference
+                    a.pagerank AS sourcePageRank, b.pagerank AS targetPageRank // Get PageRank for source and target accounts
+                WITH a, b, c1, c2, communityDifference, sourcePageRank, targetPageRank,
+                    point({latitude: c1.Latitude, longitude: c1.Longitude}) AS customerLocationC1,
+                    point({latitude: c2.Latitude, longitude: c2.Longitude}) AS customerLocationC2
+                WITH a, b, c1, c2, communityDifference, sourcePageRank, targetPageRank, customerLocationC1, customerLocationC2,
+                    point.distance(customerLocationC1, customerLocationC2)/1000 AS distanceBetweenCustomersInKM
+                WHERE communityDifference > 1 // Define a threshold for community ID difference
+                AND sourcePageRank < targetPageRank // Consider only transfers to higher PageRank accounts
+                AND distanceBetweenCustomersInKM > 5000
+                RETURN a.AccountNumber AS C1_AccountNumber, b.AccountNumber AS C2_AccountNumber, c1.CIF AS C1_CIF, c2.CIF AS C2_CIF, communityDifference, sourcePageRank, targetPageRank, distanceBetweenCustomersInKM
+                """
+                run_query(q9_cypher, "QUERY-9", q9_description)
+
             else:
                 log.info("Invalid query number. Please select a number from 1 to 6.")
         except ValueError:
