@@ -1,3 +1,13 @@
+"""
+cypher_app.py
+
+Description:
+The app.py include Cypher queries enabled by both GDS and APOC, to discover insights related to customer accounts, purchases and merchants from the CustomerGraph.
+
+Author: Benjamin Chu
+Date: 11-09-2023
+"""
+
 import logging
 import os
 import pandas as pd
