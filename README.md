@@ -94,7 +94,10 @@ pip install -r requirements.txt
 This command will install all the necessary Python packages and their specific versions as specified in requirements.txt.
 You are now ready to work with the project in the dedicated "nexus360" conda environment. Remember to activate this environment whenever you work on the project to ensure that you are using the correct dependencies.
 
-## Graph Schema![graph_schema](https://github.com/bchuminx/CustomerNexus360/assets/7111764/1f0b6d52-f86a-4965-ba78-2d0faf7d2655)
+## Graph Schema
+
+![graph_schema](https://github.com/bchuminx/CustomerNexus360/assets/7111764/0cf2add9-94cd-4b60-8b3f-ad5ce194f6aa)
+
 
 The graph schema is designed to represent customer data, card information, account transfers, and purchase transactions in a Neo4j graph database. It aims to capture essential information while optimizing data storage and query performance.
 ### Customer Node
@@ -132,6 +135,7 @@ The graph schema is designed to represent customer data, card information, accou
     purchaseId: Taken from 'TransactionID' in 'purchases.csv'.
 
 - **HAS_MERCHANT**: Links Purchase placeholder nodes to Merchant label ('Facebook', etc.)
+- **HAS_CARD_ISSUER**: Links Card nodes to CardIssuer label ('Visa', 'MasterCard', 'UnionPay', etc.)
 
 ### Account Transfer
 Accounts can make transfers between each other
