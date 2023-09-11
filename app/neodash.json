@@ -2,7 +2,7 @@
   "title": "CustomerNexus360",
   "version": "2.3",
   "settings": {
-    "pagenumber": 0,
+    "pagenumber": 1,
     "editable": true,
     "fullscreenEnabled": false,
     "parameters": {
@@ -187,10 +187,10 @@
           "id": "1c675026-ea1e-49a2-a1da-606346781548",
           "title": "Customer Purchase Preferences History",
           "query": "MATCH (c:Customer)-[:HAS_CARD]->(card)-[r:PURCHASE]->(purchase)-[:HAS_MERCHANT]->(merchant)\nWITH c.CIF AS CustomerID, COLLECT(labels(merchant)) AS MerchantNames, ROUND(SUM(r.purchaseAmount), 2) AS Total_Expenditure\nWITH CustomerID, apoc.coll.flatten(MerchantNames) AS MerchantNames, Total_Expenditure\nWITH CustomerID, apoc.coll.frequencies(MerchantNames) AS MerchantFrequencies, Total_Expenditure\nUNWIND MerchantFrequencies AS output \nWITH CustomerID, output.item + ':' + output.count AS MerchantCountConcatenated, Total_Expenditure\nWITH CustomerID, COLLECT(MerchantCountConcatenated) AS AllMerchantCounts, Total_Expenditure\nWITH CustomerID, AllMerchantCounts, Total_Expenditure\nWITH CustomerID, [countStr IN AllMerchantCounts | apoc.text.split(countStr, ':')] AS SplitCounts, Total_Expenditure\nWITH CustomerID, [item IN SplitCounts | item[0] + ':' + item[1]] AS AllMerchantCounts, Total_Expenditure\nWITH CustomerID, AllMerchantCounts, Total_Expenditure\nWITH CustomerID, AllMerchantCounts, Total_Expenditure\nRETURN CustomerID, \n       REDUCE(s = [], countStr IN AllMerchantCounts | \n             CASE WHEN SIZE(s) < 5 THEN s + countStr ELSE s END) AS Top_5_Merchant_Counts, \n       Total_Expenditure\nORDER BY Total_Expenditure DESC\n",
-          "width": 6,
+          "width": 7,
           "height": 2,
           "x": 4,
-          "y": 3,
+          "y": 2,
           "type": "table",
           "selection": {},
           "settings": {
@@ -205,7 +205,7 @@
           "id": "f397a7db-f531-4616-8415-b9a6a5781474",
           "title": "Top 5 Merchant Purchases",
           "query": "MATCH (:Customer)-[:HAS_CARD]->(:Card)-[:PURCHASE]->(:Purchase)-[:HAS_MERCHANT]->(merchant)\nWITH merchant, COUNT(*) AS totalPurchaseCount\nRETURN labels(merchant)[0] AS merchant, totalPurchaseCount\nORDER BY totalPurchaseCount\nLIMIT 5",
-          "width": 6,
+          "width": 7,
           "height": 2,
           "x": 4,
           "y": 0,
